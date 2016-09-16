@@ -35,13 +35,13 @@ def expand_list(vl_list):
 
 
 #create UCS VLANs
-#def create_UCS_VLAN(vl_range):
-#	handle = UcsHandle(credentials.UCS_login['ipaddr'], credentials.UCS_login['username'], credentials.UCS_login['password'])
-#	handle.login()
-#	for vlan_id in vl_range:
-#	    mo = FabricVlan(parent_mo_or_dn="fabric/lan", sharing="none", name="ACI-" + vlan_id, id=vlan_id, mcast_policy_name="", policy_owner="local", default_net="no", pub_nw_name="", compression_type="included")
-#	    handle.add_mo(mo)
-#	handle.commit()
+def create_UCS_VLAN(vl_range):
+	handle = UcsHandle(credentials.UCS_login['ipaddr'], credentials.UCS_login['username'], credentials.UCS_login['password'])
+	handle.login()
+	for vlan_id in vl_range:
+	    mo = FabricVlan(parent_mo_or_dn="fabric/lan", sharing="none", name="ACI-" + vlan_id, id=vlan_id, mcast_policy_name="", policy_owner="local", default_net="no", pub_nw_name="", compression_type="included")
+	    handle.add_mo(mo)
+	handle.commit()
 
 #create ACI VLAN Pool
 def create_ACI_VLAN (vName, vID):
@@ -59,6 +59,6 @@ def create_ACI_VLAN (vName, vID):
 
 vl_range = expand_list(vl_input)
 
-#create_UCS_VLAN(vl_range)
+create_UCS_VLAN(vl_range)
 create_ACI_VLAN("python_pool",vl_range)
 

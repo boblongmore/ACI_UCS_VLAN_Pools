@@ -6,6 +6,8 @@
 #import UCS packages
 from ucsmsdk.mometa.fabric.FabricVlan import FabricVlan
 from ucsmsdk.ucshandle import UcsHandle
+from ucsmsdk.mometa.vnic.VnicLanConnTempl import VnicLanConnTempl
+from ucsmsdk.mometa.vnic.VnicEtherIf import VnicEtherIf
 import sys
 import credentials
 import cobra.mit.access
@@ -43,7 +45,7 @@ def create_UCS_VLAN(vl_range):
 	    handle.add_mo(mo)
 	handle.commit()
 
-#create ACI VLAN Pool
+#create ACI VLAN Pool. The Pool name is static for now.
 def create_ACI_VLAN (vName, vID):
 	ls = cobra.mit.session.LoginSession('https://'+credentials.ACI_login['ipaddr'], credentials.ACI_login['username'], credentials.ACI_login['password'])
 	md = cobra.mit.access.MoDirectory(ls)
@@ -57,8 +59,22 @@ def create_ACI_VLAN (vName, vID):
 	c.addMo(infraInfra)
 	md.commit(c)
 
+#add VLANs to VNIC Templates. The template names are assumed based on implementation standards. They should be modified to match the environment.
+def modify_UCS_VNIC(vl_range):
+	handle = UcsHandle(credentials.UCS_login['ipaddr'], credentials.UCS_login['username'], credentials.UCS_login['password'])
+	handle.login()
+	for vlan_id in vl_range:	    
+	    mo = VnicLanConnTempl(parent_mo_or_dn="org-root", name="ACI-A")
+	    mo_vnic_a = VnicEtherIf(parent_mo_or_dn=mo, default_net="no", name="ACI-" + vlan_id)
+	    handle.set_mo(mo)
+	    mo = VnicLanConnTempl(parent_mo_or_dn="org-root", name="ACI-B")
+	    mo_vnic_b = VnicEtherIf(parent_mo_or_dn=mo, default_net="no", name="ACI-" + vlan_id)
+	    handle.set_mo(mo)
+	    handle.commit()
+
 vl_range = expand_list(vl_input)
 
 create_UCS_VLAN(vl_range)
 create_ACI_VLAN("python_pool",vl_range)
+modify_UCS_VNIC(vl_range)
 
